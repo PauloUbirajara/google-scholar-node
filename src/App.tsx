@@ -1,9 +1,15 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import { Main } from './pages/Main';
+
 function App() {
 	return (
-		<div>
-			<h1>Vite + React + Typescript</h1>
-			<h2>Github Template</h2>
-		</div>
+		<BrowserRouter>
+			<Routes>
+				<Route path="/" element={<Main />} />
+				<Route path="*" element={<h1>404</h1>} />
+			</Routes>
+		</BrowserRouter>
 	);
 }
 
