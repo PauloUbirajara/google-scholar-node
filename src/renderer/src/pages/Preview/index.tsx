@@ -21,30 +21,30 @@ import {
 import { useSpreadsheet } from '../../hooks/useSpreadsheet'
 import { StartSearchFloatingButton } from '../../components/StartSearchFloatingButton'
 
-export const Preview = () => {
+export const Preview = (): JSX.Element => {
   const location = useLocation()
   const navigate = useNavigate()
   const { setFile, data, isLoaded } = useSpreadsheet()
 
-  const { spreadsheet } = location.state
+  const { file } = location.state
 
   useEffect(() => {
-    if (spreadsheet === undefined) {
+    if (file === undefined) {
       navigate('/')
       return
     }
 
-    setFile(spreadsheet)
+    setFile(file)
   }, [])
 
   return (
     <>
-      {spreadsheet && (
+      {file && (
         <Text p={5} fontSize={'lg'}>
-          Arquivo selecionado: {spreadsheet.name}
+          Arquivo selecionado: {file.name}
         </Text>
       )}
-      {!isLoaded ? (
+      {/* {!isLoaded ? (
         <AbsoluteCenter>
           <CircularProgress isIndeterminate />
         </AbsoluteCenter>
@@ -95,6 +95,7 @@ export const Preview = () => {
         </Tabs>
       )}
 
+*/}
       <StartSearchFloatingButton data={data} />
     </>
   )
