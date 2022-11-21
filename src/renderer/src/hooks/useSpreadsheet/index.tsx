@@ -1,41 +1,45 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
-import { SpreadsheetData } from '../../interfaces/SpreadsheetData';
-import { adapters } from '../../adapters';
+import { SpreadsheetData } from '../../interfaces/spreadsheet.interface'
+import { useFileAdapter } from '../useFileAdapter'
 
 export const useSpreadsheet = () => {
-	const [file, setFile] = useState<File | null>(null);
-	const [data, setData] = useState<SpreadsheetData[]>([]);
-	const [isLoaded, setIsLoaded] = useState(false);
+  const [file, setFile] = useState<File | null>(null)
+  const [data, setData] = useState<SpreadsheetData[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
-	useEffect(() => {
-		setIsLoaded(false);
-		setData([]);
+  const findAdapter = useFileAdapter()
 
-		if (file === null) {
-			setIsLoaded(true);
-			return;
-		}
+  async function loadFileArrayBuffer(file): Promise<void> {
+    const arrayBuffer = await file.arrayBuffer()
+    const adapter = findAdapter(file)
 
-		const adapter = adapters.find((ad) => ad.isValid(file.name));
+    if (!adapter) {
+      setIsLoaded(true)
+      return
+    }
 
-		if (adapter === undefined) {
-			setIsLoaded(true);
-			return;
-		}
+    await adapter.loadFromArrayBufferAsync(arrayBuffer)
+    const tempData = await adapter.getDataAsync()
+    setData(tempData)
+    setIsLoaded(true)
+  }
 
-		(async () => {
-			const arrayBuffer = await file.arrayBuffer();
-			await adapter.loadFromArrayBufferAsync(arrayBuffer);
-			const tempData = await adapter.getDataAsync();
-			setData(tempData);
-			setIsLoaded(true);
-		})();
-	}, [file]);
+  useEffect(() => {
+    setIsLoaded(false)
+    setData([])
 
-	return {
-		setFile,
-		data,
-		isLoaded
-	};
-};
+    if (file === null) {
+      setIsLoaded(true)
+      return
+    }
+
+    loadFileArrayBuffer(file)
+  }, [file])
+
+  return {
+    setFile,
+    data,
+    isLoaded
+  }
+}
