@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs'
 
-import { SpreadsheetData } from '../interfaces/SpreadsheetData'
-import { BaseSpreadsheetAdapter } from './ISpreadsheetAdapter'
+import { SpreadsheetData } from '../interfaces/spreadsheet.interface'
+import { BaseSpreadsheetAdapter } from './base.adapter'
 
 class ExcelJsAdapter extends BaseSpreadsheetAdapter {
   private workbook: ExcelJS.Workbook

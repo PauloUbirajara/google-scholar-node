@@ -1,4 +1,4 @@
-import { SpreadsheetData } from '../interfaces/SpreadsheetData'
+import { SpreadsheetData } from '../interfaces/spreadsheet.interface'
 
 export abstract class BaseSpreadsheetAdapter {
   private readonly SUPPORTED_EXTENSIONS: string[]

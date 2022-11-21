@@ -1,7 +1,7 @@
 import { read, WorkBook } from 'xlsx'
 
-import { SpreadsheetData } from '../interfaces/SpreadsheetData'
-import { BaseSpreadsheetAdapter } from './ISpreadsheetAdapter'
+import { SpreadsheetData } from '../interfaces/spreadsheet.interface'
+import { BaseSpreadsheetAdapter } from './base.adapter'
 
 class SheetJsAdapter extends BaseSpreadsheetAdapter {
   private data: WorkBook | null | undefined
