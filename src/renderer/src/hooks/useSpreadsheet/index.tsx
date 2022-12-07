@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { SpreadsheetData } from '../../interfaces/spreadsheet.interface'
-import { useFileAdapter } from '../useFileAdapter'
+import { SpreadsheetData } from '@renderer/interfaces/spreadsheet.interface'
+import { useFileAdapter } from '@renderer/hooks/useFileAdapter'
 
 export const useSpreadsheet = () => {
   const [file, setFile] = useState<File | null>(null)
