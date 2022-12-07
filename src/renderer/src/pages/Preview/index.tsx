@@ -1,102 +1,51 @@
-import { useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  Text,
-  AbsoluteCenter,
-  CircularProgress,
-  Container,
-  Tab,
-  Table,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr
-} from '@chakra-ui/react'
+import { useEffect, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
+import { Center, CircularProgress, Text } from '@chakra-ui/react'
 
-import { useSpreadsheet } from '../../hooks/useSpreadsheet'
-import { StartSearchFloatingButton } from '../../components/StartSearchFloatingButton'
+import { useSpreadsheet } from '@renderer/hooks/useSpreadsheet'
+import { StartSearchFloatingButton } from '@renderer/components/StartSearchFloatingButton'
 
 export const Preview = (): JSX.Element => {
   const location = useLocation()
-  const navigate = useNavigate()
   const { setFile, data, isLoaded } = useSpreadsheet()
 
-  const { file } = location.state
+  const file = useMemo(() => {
+    try {
+      return location.state.file
+    } catch (e) {
+      return null
+    }
+  }, [])
 
   useEffect(() => {
-    if (file === undefined) {
-      navigate('/')
-      return
-    }
-
     setFile(file)
   }, [])
 
   return (
     <>
+      {!isLoaded && (
+        <Center h={'100%'}>
+          <CircularProgress isIndeterminate />
+        </Center>
+      )}
+      {!file && (
+        <Center>
+          <Text fontSize={'xl'} color={'red.600'} fontWeight={700}>
+            Não foi possível abrir o arquivo
+          </Text>
+        </Center>
+      )}
       {file && (
-        <Text p={5} fontSize={'lg'}>
+        <Text fontSize={'lg'} marginBottom={'5'}>
           Arquivo selecionado: {file.name}
         </Text>
       )}
-      {/* {!isLoaded ? (
-        <AbsoluteCenter>
-          <CircularProgress isIndeterminate />
-        </AbsoluteCenter>
+      {/* {data !== null ? (
+        <SpreadsheetTable data={data} />
       ) : (
-        <Tabs>
-          <TabList position={'sticky'} top="4.5rem" shadow={'sm'} bgColor={'chakra-body-bg'}>
-            {data.map((tab, idx) => (
-              <Tab key={`tab-${tab.sheetName}-${idx}`}>{tab.sheetName}</Tab>
-            ))}
-          </TabList>
-
-          <Container maxW={'container.xl'}>
-            <TabPanels>
-              {data.map((tab, idx) => (
-                <TabPanel key={`panel-${tab.sheetName}-${idx}`}>
-                  <Table size="sm">
-                    <Thead
-                      position={'sticky'}
-                      top="7.085rem"
-                      shadow={'sm'}
-                      backdropFilter={'blur(50px)'}
-                      backdropBlur={'md'}
-                    >
-                      <Tr>
-                        {tab.values.map((col, idx) => (
-                          <Th key={`col-${col}-${idx}`}>{col.find((c) => c != undefined)}</Th>
-                        ))}
-                      </Tr>
-                    </Thead>
-
-                    <Tbody>
-                      {tab.values[0].map(
-                        (_, idx: number) =>
-                          idx > 1 && (
-                            <Tr key={`row-${idx}`}>
-                              {tab.values.map((col) => (
-                                <Td key={`col-${col}-${idx}`}>{col[idx]}</Td>
-                              ))}
-                            </Tr>
-                          )
-                      )}
-                    </Tbody>
-                  </Table>
-                </TabPanel>
-              ))}
-            </TabPanels>
-          </Container>
-        </Tabs>
-      )}
-
-*/}
-      <StartSearchFloatingButton data={data} />
+        'Não foi possível carregar a visualização do arquivo'
+      )} */}
+      {data && <StartSearchFloatingButton data={data} />}
     </>
   )
 }
