@@ -34,7 +34,7 @@ export const Header = (): JSX.Element => {
       </Button>
 
       <Box>
-        <Tooltip label="Alterar tema">
+        <Tooltip label="Alterar tema" placement="auto">
           <IconButton
             aria-label="Change theme"
             icon={colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
