@@ -1,42 +1,47 @@
-import { ExternalLinkIcon, InfoIcon } from '@chakra-ui/icons'
+import { InfoIcon } from '@chakra-ui/icons'
 import {
   Box,
+  Center,
+  CircularProgress,
+  CircularProgressLabel,
   IconButton,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Progress,
-  Stack,
   Text,
   Tooltip,
   useDisclosure
 } from '@chakra-ui/react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
-import { BaseService } from '@renderer/services/base.service'
-import { SpreadsheetData } from '../../interfaces/spreadsheet.interface'
-import FetchService from '../../services/fetch.service'
+import { Author } from '@renderer/types/author.type'
+import { BaseFetchService } from '@renderer/services/baseFetch.service'
+import { BaseSaveService } from '@renderer/services/baseSave.service'
 import { getValidCells } from './valid.cells'
 import { SCHOLAR_URL_REGEX } from '@renderer/helpers/regex.helper'
-import { Citation } from '@renderer/types/citation.type'
-import { Details } from '@renderer/types/details.type'
+import { Sheet } from '@renderer/types/sheet.type'
+import { Spreadsheet } from '@renderer/types/spreadsheet.type'
+import { SpreadsheetData } from '@renderer/interfaces/spreadsheet.interface'
+import FetchService from '@renderer/services/fetch.service'
+import saveSheetJsService from '@renderer/services/saveSheetJs.service'
 
 interface StartSearchProps {
   data: SpreadsheetData[]
 }
 
 const DELAY_BETWEEN_REQUESTS = 15000
-const service: BaseService = FetchService
+const fetchService: BaseFetchService = FetchService
+const saveService: BaseSaveService = saveSheetJsService
 
 export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element => {
+  const navigate = useNavigate()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [progress, setProgress] = useState(0)
   const [currentSheet, setCurrentSheet] = useState<string>()
-  const [authorDetails, setAuthorDetails] = useState<Details | undefined>()
 
   const { data } = props
 
@@ -45,28 +50,68 @@ export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element 
     [data]
   )
 
-  async function visitProfile(currentAuthor: string): Promise<[Details, Citation[]] | undefined> {
+  async function visitProfile(currentAuthor: string): Promise<Author | undefined> {
     try {
-      await service.visitAuthor(currentAuthor)
+      await fetchService.visitAuthor(currentAuthor)
 
-      const [details, citations] = await Promise.all([
-        FetchService.fetchUserDetails(),
-        FetchService.fetchUserCitations()
-      ])
+      const details = await fetchService.fetchUserDetails()
+      const citations = await fetchService.fetchUserCitations()
 
       await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS))
-      return Promise.resolve([details, citations])
+      return Promise.resolve({ details, citations } as Author)
     } catch (e) {
       console.warn(e)
+      return Promise.reject(undefined)
     } finally {
       setProgress((prev) => prev + 1)
     }
   }
 
-  const resetProgressStats = () => {
+  const resetProgressStats = (): void => {
     setCurrentSheet('')
-    setAuthorDetails(undefined)
   }
+
+  const startFetch = useCallback(async (): Promise<void> => {
+    const spreadsheet: Spreadsheet = {
+      sheets: []
+    }
+
+    for (const sheet of data) {
+      const filteredCells = sheet.values
+        .flatMap((col) => col.filter((c) => SCHOLAR_URL_REGEX.test(c)))
+        .filter((c) => c !== undefined && Boolean(c))
+
+      const tempSheet: Sheet = {
+        name: sheet.sheetName,
+        data: []
+      }
+
+      for (const cell of filteredCells) {
+        setCurrentSheet(sheet.sheetName)
+
+        try {
+          const author = await visitProfile(cell)
+
+          if (!author || author === undefined) {
+            continue
+          }
+
+          author.details.url = cell
+          tempSheet.data.push(author)
+        } catch (e) {
+          continue
+        }
+      }
+
+      spreadsheet.sheets.push(tempSheet)
+    }
+
+    saveService.load(spreadsheet)
+
+    navigate('/results')
+
+    resetProgressStats()
+  }, [data])
 
   useEffect(() => {
     if (!data || data.length === 0) {
@@ -75,35 +120,12 @@ export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element 
 
     onOpen()
     setProgress(0)
-    FetchService.abortPendingRequests()
-    console.log('')
-    console.log('')
-    console.log('')
-    console.log('')
-    ;(async () => {
-      console.clear()
-      for (const sheet of data) {
-        const filteredCells = sheet.values
-          .flatMap((col) => col.filter((c) => SCHOLAR_URL_REGEX.test(c)))
-          .filter((c) => c !== undefined && Boolean(c))
+    fetchService.abortPendingRequests()
 
-        console.log(filteredCells)
-
-        for (const cell of filteredCells) {
-          setCurrentSheet(sheet.sheetName)
-          const [details, citations] = await visitProfile(cell)
-          details.url = cell
-          setAuthorDetails(details)
-          console.log(details, citations)
-          // TODO Criar nova planilha e ir carregando a partir daqui em memoria ou então só uma vez
-        }
-      }
-
-      resetProgressStats()
-    })()
+    startFetch()
 
     return () => {
-      FetchService.abortPendingRequests()
+      fetchService.abortPendingRequests()
     }
   }, [data])
 
@@ -119,7 +141,7 @@ export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element 
 
   return (
     <>
-      <Tooltip label="Ver estado da coleta">
+      <Tooltip label="Ver estado da coleta" placement="auto">
         <IconButton
           position="fixed"
           right="8"
@@ -138,18 +160,12 @@ export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element 
           <ModalCloseButton />
           <ModalBody>
             <Box>
-              <Stack gap={2}>
-                <Progress size="xs" value={calculateProgress()} />
-                <Text>{currentSheet && `Página atual: ${currentSheet}`}</Text>
-                <Text>{progress}</Text>
-                <Text>{maxAuthorCount}</Text>
-                {authorDetails && (
-                  <Link href={authorDetails.url && authorDetails.url} isExternal>
-                    Ver pesquisador atual
-                    <ExternalLinkIcon mx="2px" ml={2} />
-                  </Link>
-                )}
-              </Stack>
+              <Center>
+                <CircularProgress value={calculateProgress()} size="5rem" marginBottom={'2'}>
+                  <CircularProgressLabel>{`${progress}/${maxAuthorCount}`}</CircularProgressLabel>
+                </CircularProgress>
+              </Center>
+              <Text>{currentSheet && `Página atual: ${currentSheet}`}</Text>
             </Box>
           </ModalBody>
         </ModalContent>

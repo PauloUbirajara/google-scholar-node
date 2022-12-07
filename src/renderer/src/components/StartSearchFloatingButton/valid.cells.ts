@@ -6,7 +6,7 @@ export function getValidCells(sheet: SpreadsheetData): string[] {
 
   return sheet.values.reduce(
     (total: string[], current: string[]) =>
-      current.filter((cell) => SCHOLAR_URL_REGEX.test(cell as string)).concat(total),
+      current.filter((cell: string) => SCHOLAR_URL_REGEX.test(cell)).concat(total),
     []
   )
 }
