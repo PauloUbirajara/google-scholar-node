@@ -1,9 +1,9 @@
-import { SCHOLAR_URL_REGEX } from '@renderer/helpers/regex.helper'
+import { BaseFetchService } from '@renderer/services/baseFetch.service'
 import { Citation } from '@renderer/types/citation.type'
 import { Details } from '@renderer/types/details.type'
-import { BaseService } from './base.service'
+import { SCHOLAR_URL_REGEX } from '@renderer/helpers/regex.helper'
 
-class FetchService implements BaseService {
+class FetchService implements BaseFetchService {
   private currentPage: string | undefined
   private parser: DOMParser
   private abortController: AbortController
@@ -73,7 +73,7 @@ class FetchService implements BaseService {
       throw new Error('Não foi possível obter dados de pesquisador')
     }
 
-    const details: Details = { name, hIndex, i10Index, authorUrl }
+    const details: Details = { name, hIndex, i10Index }
 
     return details
   }
