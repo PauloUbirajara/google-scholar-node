@@ -1,5 +1,5 @@
 import { Box } from '@chakra-ui/react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import { Header } from '@renderer/components/Header'
 import { CustomBreadcrumb } from '@renderer/components/CustomBreadcrumb'
@@ -10,7 +10,7 @@ import { Results } from '@renderer/pages/Results'
 const App = (): JSX.Element => {
   return (
     <Box pt={'16'}>
-      <BrowserRouter>
+      <HashRouter>
         <Header />
         <Box p={5}>
           <CustomBreadcrumb />
@@ -18,10 +18,10 @@ const App = (): JSX.Element => {
             <Route path="/" element={<Main />} />
             <Route path="/preview" element={<Preview />} />
             <Route path="/results" element={<Results />} />
-            <Route path="*" element={<h1>404</h1>} />
+            <Route path="*" element={<Navigate to={'/'} />} />
           </Routes>
         </Box>
-      </BrowserRouter>
+      </HashRouter>
     </Box>
   )
 }
