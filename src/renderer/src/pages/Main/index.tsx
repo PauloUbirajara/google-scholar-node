@@ -1,4 +1,4 @@
-import { Text, Box, Stack } from '@chakra-ui/react'
+import { Text, Stack } from '@chakra-ui/react'
 
 import { FileSelectForm } from '@renderer/components/FileSelectForm'
 
