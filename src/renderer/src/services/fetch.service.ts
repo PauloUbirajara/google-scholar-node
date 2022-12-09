@@ -56,17 +56,54 @@ class FetchService implements BaseFetchService {
         return Promise.reject(err)
       })
 
+    console.log('Definindo URL', authorUrl)
     this.currentPage = pageText
+  }
+
+  private getNameFromDocument(document): string {
+    const nameElement = document.querySelector('#gsc_prf_in')
+    if (!nameElement) {
+      console.warn(document)
+      console.warn('nameElement', nameElement)
+      const errorMessage = 'Erro ao buscar nome de pesquisador'
+      throw new Error(errorMessage)
+    }
+    const name = nameElement.textContent
+    return name
+  }
+
+  private getHIndexFromDocument(document): string {
+    const allDetailsValues = document.querySelectorAll('.gsc_rsb_std')
+    const hIndexElement = allDetailsValues[2]
+    if (!hIndexElement) {
+      console.warn(document)
+      console.warn('hIndexElement', hIndexElement)
+      const errorMessage = 'Erro ao buscar h-index de pesquisador'
+      throw new Error(errorMessage)
+    }
+    const hIndex = hIndexElement.textContent
+    return hIndex
+  }
+
+  private getI10IndexFromDocument(document): string {
+    const allDetailsValues = document.querySelectorAll('.gsc_rsb_std')
+    const i10IndexElement = allDetailsValues[4]
+    if (!i10IndexElement) {
+      console.warn(document)
+      console.warn('i10IndexElement', i10IndexElement)
+      const errorMessage = 'Erro ao buscar i10-index de pesquisador'
+      throw new Error(errorMessage)
+    }
+    const i10Index = i10IndexElement.textContent
+    return i10Index
   }
 
   public async fetchUserDetails(): Promise<Details> {
     const { documentElement } = this.getParsedPage()
 
-    const name = documentElement.querySelector('#gsc_prf_in')?.textContent
-
-    const allDetailsValues = documentElement.querySelectorAll('.gsc_rsb_std')
-    const hIndex = allDetailsValues[2].textContent
-    const i10Index = allDetailsValues[4].textContent
+    const name = this.getNameFromDocument(documentElement)
+    const hIndex = this.getHIndexFromDocument(documentElement)
+    const i10Index = this.getI10IndexFromDocument(documentElement)
 
     if (!name || !hIndex || !i10Index) {
       console.warn(name, hIndex, i10Index)
@@ -78,23 +115,52 @@ class FetchService implements BaseFetchService {
     return details
   }
 
+  private getYearsFromDocument(document): string[] {
+    const years: string[] = []
+
+    const totalYears = document.querySelectorAll('.gsc_g_t')
+    for (const yearElement of totalYears) {
+      if (!yearElement) {
+        console.warn(document)
+        console.warn(yearElement)
+        const errorMessage = `Não foi possível obter ano do ${yearElement}`
+        throw new Error(errorMessage)
+      }
+      const year = yearElement.textContent
+      years.push(year)
+    }
+
+    return years
+  }
+
+  private getCitationsFromDocument(document): number[] {
+    const totalCitations = document.querySelectorAll('.gsc_g_a')
+    const totalYears = Array.from(document.querySelectorAll('.gsc_g_t')).length
+    const citations: number[] = Array(totalYears)
+
+    for (const citationElement of totalCitations) {
+      if (!citationElement) {
+        console.warn(document)
+        console.warn(citationElement)
+        const errorMessage = `Não foi possível obter citação do ${citationElement}`
+        throw new Error(errorMessage)
+      }
+      const citationIndex = totalYears - Number(citationElement.style.zIndex)
+      const citation = Number(citationElement.textContent)
+      citations[citationIndex] = citation
+    }
+
+    return citations
+  }
+
   public async fetchUserCitations(): Promise<Citation[]> {
     const { documentElement } = this.getParsedPage()
 
-    const totalYears = documentElement.querySelectorAll('.gsc_g_t')
-    const totalCitations = documentElement.querySelectorAll('.gsc_g_al')
+    const years = this.getYearsFromDocument(documentElement)
+    const citations = this.getCitationsFromDocument(documentElement)
 
-    const data: Citation[] = []
-
-    for (let i = 0; i < totalYears.length; i++) {
-      const year = totalYears[i].textContent
-      const citations = Number(totalCitations[i].textContent)
-
-      if (year && citations) {
-        const citationPerYear: Citation = { year, citations }
-        data.push(citationPerYear)
-      }
-    }
+    const data: Citation[] = years.map((y, i) => ({ year: y, citations: citations[i] }))
+    console.log('Dados coletados', data)
 
     return data
   }
