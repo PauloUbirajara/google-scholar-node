@@ -3,7 +3,6 @@ import {
   Box,
   Center,
   CircularProgress,
-  CircularProgressLabel,
   IconButton,
   Modal,
   ModalBody,
@@ -33,7 +32,7 @@ interface StartSearchProps {
   data: SpreadsheetData[]
 }
 
-const DELAY_BETWEEN_REQUESTS = 15000
+const DELAY_BETWEEN_REQUESTS = 25000
 const fetchService: BaseFetchService = FetchService
 const saveService: BaseSaveService = saveSheetJsService
 
@@ -161,9 +160,10 @@ export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element 
           <ModalBody>
             <Box>
               <Center>
-                <CircularProgress value={calculateProgress()} size="5rem" marginBottom={'2'}>
-                  <CircularProgressLabel>{`${progress}/${maxAuthorCount}`}</CircularProgressLabel>
-                </CircularProgress>
+                <CircularProgress value={calculateProgress()} size="5rem"></CircularProgress>
+              </Center>
+              <Center>
+                <Text marginBottom={'2'}>{`${progress}/${maxAuthorCount}`}</Text>
               </Center>
               <Text>{currentSheet && `Página atual: ${currentSheet}`}</Text>
             </Box>
