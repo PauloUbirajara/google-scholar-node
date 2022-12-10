@@ -10,7 +10,7 @@ export const FormSubmit = (props: FormSubmitProps): JSX.Element => {
   return (
     <FormControl>
       <Button type="submit" colorScheme="blue" cursor="pointer" isDisabled={file === undefined}>
-        Visualizar
+        Iniciar coleta
       </Button>
     </FormControl>
   )
