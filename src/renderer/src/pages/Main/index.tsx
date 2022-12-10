@@ -1,6 +1,6 @@
 import { Text, Stack } from '@chakra-ui/react'
 
-import { FileSelectForm } from '@renderer/components/FileSelectForm'
+import { SetupForm } from '@renderer/components/SetupForm'
 
 export const Main = (): JSX.Element => {
   return (
@@ -8,7 +8,7 @@ export const Main = (): JSX.Element => {
       <Text fontSize="xl" as="b">
         Coletar Citações
       </Text>
-      <FileSelectForm />
+      <SetupForm />
     </Stack>
   )
 }
