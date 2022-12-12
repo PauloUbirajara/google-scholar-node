@@ -6,6 +6,7 @@ import { CustomBreadcrumb } from '@renderer/components/CustomBreadcrumb'
 import { Main } from '@renderer/pages/Main'
 import { Preview } from '@renderer/pages/Preview'
 import { Results } from '@renderer/pages/Results'
+import { Footer } from './components/Footer'
 
 const App = (): JSX.Element => {
   return (
@@ -21,6 +22,7 @@ const App = (): JSX.Element => {
             <Route path="*" element={<Navigate to={'/'} />} />
           </Routes>
         </Box>
+        <Footer />
       </HashRouter>
     </Box>
   )
