@@ -15,7 +15,7 @@ export const SetupForm = (): JSX.Element => {
   const onSubmit = (event: FormEvent): void => {
     event.preventDefault()
 
-    navigate('/preview', { state: { file } })
+    navigate('/preview', { state: { file, years } })
   }
 
   return (
