@@ -66,7 +66,7 @@ class FetchService implements BaseFetchService {
     this.currentPage = pageText
   }
 
-  private getNameFromDocument(document): string {
+  private getNameFromDocument(document: HTMLElement): string {
     const nameElement = document.querySelector('#gsc_prf_in')
 
     if (!nameElement) {
@@ -76,11 +76,11 @@ class FetchService implements BaseFetchService {
       throw new Error(errorMessage)
     }
 
-    const name = nameElement.textContent
+    const name = nameElement.textContent || '<Sem Nome>'
     return name
   }
 
-  private getHIndexFromDocument(document): string {
+  private getHIndexFromDocument(document: HTMLElement): string {
     const allDetailsValues = document.querySelectorAll('.gsc_rsb_std')
     const hIndexElement = allDetailsValues[2]
 
@@ -91,11 +91,11 @@ class FetchService implements BaseFetchService {
       throw new Error(errorMessage)
     }
 
-    const hIndex = hIndexElement.textContent
+    const hIndex = hIndexElement.textContent || '0'
     return hIndex
   }
 
-  private getI10IndexFromDocument(document): string {
+  private getI10IndexFromDocument(document: HTMLElement): string {
     const allDetailsValues = document.querySelectorAll('.gsc_rsb_std')
     const i10IndexElement = allDetailsValues[4]
 
@@ -106,7 +106,7 @@ class FetchService implements BaseFetchService {
       throw new Error(errorMessage)
     }
 
-    const i10Index = i10IndexElement.textContent
+    const i10Index = i10IndexElement.textContent || '0'
     return i10Index
   }
 
@@ -127,10 +127,15 @@ class FetchService implements BaseFetchService {
     return details
   }
 
-  private getYearsFromDocument(document): string[] {
-    const years: string[] = []
+  private getYearsFromDocument(document: HTMLElement): string[] {
+    const citationContainer = document.querySelector('.gsc_md_hist_b')
+    if (!citationContainer) {
+      throw new Error('Não foi possível encontrar elemento contendo dados de citações')
+    }
 
-    const totalYears = document.querySelectorAll('.gsc_g_t')
+    const totalYears = citationContainer.querySelectorAll('.gsc_g_t')
+    const years: string[] = Array(100).fill(undefined)
+
     for (const yearElement of totalYears) {
       if (!yearElement) {
         console.warn(document)
@@ -138,43 +143,55 @@ class FetchService implements BaseFetchService {
         const errorMessage = `Não foi possível obter ano do ${yearElement}`
         throw new Error(errorMessage)
       }
-      const year = yearElement.textContent
-      years.push(year)
+
+      const right = +(yearElement as HTMLDivElement).style.right.match(/[0-9]+/)![0]
+      const index = (right / 32) >> 0
+      const year = yearElement.textContent!
+      years[index] = year
     }
+
+    // const result = years.filter((y) => Boolean(y))
 
     return years
   }
 
-  private getCitationsFromDocument(document): number[] {
-    const totalCitations = document.querySelectorAll('.gsc_g_a')
-    const totalYears = Array.from(document.querySelectorAll('.gsc_g_t')).length
-    const citations: number[] = Array(totalYears)
+  private getCitationsFromDocument(document: HTMLElement): number[] {
+    const citationContainer = document.querySelector('.gsc_md_hist_b')
+    if (!citationContainer) {
+      throw new Error('Não foi possívele encontrar elemento contendo dados de citações.')
+    }
 
-    for (const citationElement of totalCitations) {
-      if (!citationElement) {
-        console.warn(document)
-        console.warn(citationElement)
-        const errorMessage = `Não foi possível obter citação do ${citationElement}`
-        throw new Error(errorMessage)
-      }
-      const citationIndex = totalYears - Number(citationElement.style.zIndex)
-      const citation = Number(citationElement.textContent)
-      citations[citationIndex] = citation
+    const totalCitations: HTMLElement[] = Array.from(citationContainer.querySelectorAll('.gsc_g_a'))
+
+    // Criar vetor com 100 posições para garantir a posição correta
+    const citations: number[] = Array(100).fill(0)
+
+    for (const c of totalCitations) {
+      const index = +c.style.zIndex - 1
+      const content = c?.textContent || 0
+      // const index = +(c as HTMLElement).style.zIndex - 1
+      // const content = (c as HTMLBaseElement)?.textContent || 0
+      citations[index] = +content
     }
 
     return citations
   }
 
   public async fetchUserCitations(): Promise<Citation[]> {
+    if (!this.years) {
+      throw new Error('Anos de busca não definidos')
+    }
+
     const { documentElement } = this.getParsedPage()
 
     const years = this.getYearsFromDocument(documentElement)
     const citations = this.getCitationsFromDocument(documentElement)
+    console.log('Dados coletados', years, citations)
 
     const data: Citation[] = years
-      .filter((y) => +y >= this.years.startYear && +y <= this.years.endYear)
-      .map((y, i) => ({ year: y, citations: citations[i] }))
-    console.log('Dados coletados', data)
+      .filter((y) => +y >= this.years!.startYear && +y <= this.years!.endYear)
+      .map((year, i) => ({ year, citations: citations[i] }))
+    console.log('Dados finais', data)
 
     return data
   }
