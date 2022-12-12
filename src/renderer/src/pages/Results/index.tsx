@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
 import { Box, Button, Stack, Text } from '@chakra-ui/react'
+import { useEffect, useMemo } from 'react'
 
-import SaveSheetJsService from '@renderer/services/saveSheetJs.service'
 import { BaseSaveService } from '@renderer/services/baseSave.service'
 import { Spreadsheet } from '@renderer/types/spreadsheet.type'
+import SaveSheetJsService from '@renderer/services/saveSheetJs.service'
+import { showNotification } from '@renderer/helpers/notification.helper'
 
 const saveService: BaseSaveService = SaveSheetJsService
 
@@ -14,6 +15,15 @@ export const Results = (): JSX.Element => {
     } catch (e) {
       return null
     }
+  }, [])
+
+  useEffect(() => {
+    if (!data) return
+
+    const title = 'Coleta concluída!'
+    const body = 'A coleta das citações solicitadas foi concluída com sucesso.'
+
+    showNotification(title, body)
   }, [])
 
   const onClick = (): void => {
