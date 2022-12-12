@@ -15,7 +15,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Author } from '@renderer/types/author.type'
 import { BaseFetchService } from '@renderer/services/baseFetch.service'
@@ -38,11 +38,13 @@ const saveService: BaseSaveService = saveSheetJsService
 
 export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [progress, setProgress] = useState(0)
   const [currentSheet, setCurrentSheet] = useState<string>()
 
   const { data } = props
+  const years = location.state?.years
 
   const maxAuthorCount = useMemo(
     () => data.reduce((acc, curr) => acc + getValidCells(curr).length, 0),
@@ -105,22 +107,23 @@ export const StartSearchFloatingButton = (props: StartSearchProps): JSX.Element 
       spreadsheet.sheets.push(tempSheet)
     }
 
+    saveService.setupYears(years)
     saveService.load(spreadsheet)
 
-    navigate('/results')
+    navigate('/results', { state: { years } })
 
     resetProgressStats()
   }, [data])
 
   useEffect(() => {
-    if (!data || data.length === 0) {
-      return
-    }
+    if (!data || data.length === 0) return
+    if (!years) return
 
     onOpen()
     setProgress(0)
     fetchService.abortPendingRequests()
 
+    fetchService.setupYearsToFetch(years)
     startFetch()
 
     return () => {
