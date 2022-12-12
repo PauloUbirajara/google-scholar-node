@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
 import { Center, CircularProgress, Text } from '@chakra-ui/react'
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
-import { useSpreadsheet } from '@renderer/hooks/useSpreadsheet'
 import { StartSearchFloatingButton } from '@renderer/components/StartSearchFloatingButton'
+import { useSpreadsheet } from '@renderer/hooks/useSpreadsheet'
 
 export const Preview = (): JSX.Element => {
   const location = useLocation()
