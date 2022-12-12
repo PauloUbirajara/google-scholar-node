@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 
 import { YearType } from '@renderer/types/years.type'
 import { years } from './years'
+import { validateYears } from '@renderer/helpers/years.helper'
 
 interface FormYearsProps {
   setYears: (_: YearType | undefined) => void
@@ -30,14 +31,16 @@ export const FormYears = (props: FormYearsProps): JSX.Element => {
     setYears(undefined)
     setValid(false)
 
-    if (endYear - startYear < 0) return
+    const years: YearType = { startYear, endYear }
 
-    setYears({ startYear, endYear } as YearType)
+    if (!validateYears(years)) return
+
+    setYears(years)
     setValid(true)
   }
 
-  const isInvalidStartYear = !valid || !startDateInputRef.current?.value
-  const isInvalidEndYear = !valid || !endDateInputRef.current?.value
+  const isInvalidStartYear = touched && (!valid || !startDateInputRef.current?.value)
+  const isInvalidEndYear = touched && (!valid || !endDateInputRef.current?.value)
 
   return (
     <>
