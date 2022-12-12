@@ -9,15 +9,10 @@ export const Preview = (): JSX.Element => {
   const location = useLocation()
   const { setFile, data, isLoaded } = useSpreadsheet()
 
-  const file = useMemo(() => {
-    try {
-      return location.state.file
-    } catch (e) {
-      return null
-    }
-  }, [])
+  const file = location.state?.file
 
   useEffect(() => {
+    if (!file) return
     setFile(file)
   }, [])
 
@@ -40,11 +35,6 @@ export const Preview = (): JSX.Element => {
           Arquivo selecionado: {file.name}
         </Text>
       )}
-      {/* {data !== null ? (
-        <SpreadsheetTable data={data} />
-      ) : (
-        'Não foi possível carregar a visualização do arquivo'
-      )} */}
       {data && <StartSearchFloatingButton data={data} />}
     </>
   )
