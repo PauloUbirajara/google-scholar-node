@@ -1,4 +1,4 @@
-import { Box, IconButton, Text, Tooltip, Link } from '@chakra-ui/react'
+import { IconButton, Text, Tooltip, Link } from '@chakra-ui/react'
 import { EmailIcon } from '@chakra-ui/icons'
 
 export const Footer = (): JSX.Element => {
