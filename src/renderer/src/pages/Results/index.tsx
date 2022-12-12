@@ -5,9 +5,9 @@ import SaveSheetJsService from '@renderer/services/saveSheetJs.service'
 import { BaseSaveService } from '@renderer/services/baseSave.service'
 import { Spreadsheet } from '@renderer/types/spreadsheet.type'
 
-export const Results = (): JSX.Element => {
-  const saveService: BaseSaveService = SaveSheetJsService
+const saveService: BaseSaveService = SaveSheetJsService
 
+export const Results = (): JSX.Element => {
   const data: Spreadsheet | null = useMemo((): Spreadsheet | null => {
     try {
       return saveService.getData()
@@ -20,6 +20,8 @@ export const Results = (): JSX.Element => {
     saveService.save()
   }
 
+  const isSavingDisabled = !data
+
   return (
     <Box h={'full'}>
       <Stack gap={5}>
@@ -27,13 +29,7 @@ export const Results = (): JSX.Element => {
           {'Resultados'}
         </Text>
 
-        {/* {data !== null ? (
-          <SpreadsheetTable data={data} />
-        ) : (
-          'Não foi possível carregar a visualização do arquivo'
-        )} */}
-
-        <Button colorScheme={'blue'} disabled={!data} onClick={onClick}>
+        <Button colorScheme={'blue'} disabled={isSavingDisabled} onClick={onClick}>
           Salvar
         </Button>
       </Stack>
