@@ -3,13 +3,19 @@ import SheetJs from 'xlsx'
 import { BaseSaveService } from '@renderer/services/baseSave.service'
 import { Spreadsheet } from '@renderer/types/spreadsheet.type'
 import { getFormattedDate, getFormattedTime } from '@renderer/helpers/date.helper'
-import { formatSheetJSRow, headerNames } from '@renderer/helpers/save.helper'
+import { formatSheetJSRow, getHeaderForSheetJS } from '@renderer/helpers/save.helper'
+import { YearType } from '@renderer/types/years.type'
 
 class SaveSheetJsService implements BaseSaveService {
   private data?: Spreadsheet
+  private years?: YearType
 
   load(data: Spreadsheet): void {
     this.data = data
+  }
+
+  setupYears(years: YearType): void {
+    this.years = years
   }
 
   getData(): Spreadsheet {
@@ -20,12 +26,20 @@ class SaveSheetJsService implements BaseSaveService {
     return this.data
   }
 
-  private formatSheetForSaving(sheet) {
-    return sheet.data.map(formatSheetJSRow)
+  getYears(): YearType {
+    if (!this.years) {
+      throw new Error('Ano inicial e final não definidos')
+    }
+
+    return this.years
+  }
+
+  private formatSheetForSaving(sheet): string[] {
+    return sheet.data.map((d) => formatSheetJSRow(d, this.getYears()))
   }
 
   private headerForSaving(): string[] {
-    return Object.values(headerNames)
+    return getHeaderForSheetJS(this.getYears())
   }
 
   save(): void {
