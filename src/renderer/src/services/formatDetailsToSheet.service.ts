@@ -3,8 +3,6 @@ import { FormatDetailsToSheetInterface } from "@renderer/interface/formatDetails
 import { SheetPage } from "@renderer/types/sheetPage.type";
 import { UserDetails } from "@renderer/types/userDetails.type";
 
-const COLUMN_OFFSET = 5;
-
 class FormatDetailsToSheetService implements FormatDetailsToSheetInterface {
   private getLongestRow(matrix: string[][]): number {
     return matrix

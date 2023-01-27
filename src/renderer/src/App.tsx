@@ -6,12 +6,10 @@ import ReadSheet from "@renderer/routes/ReadSheet";
 import SearchUsers from "@renderer/routes/SearchUsers";
 import FormatToSheet from "@renderer/routes/FormatToSheet";
 import Results from "@renderer/routes/Results";
-import Header from "@renderer/components/Header";
 
 const App = (): JSX.Element => {
   return (
     <HashRouter>
-      {/* <Header /> */}
       <Stack spacing={2} padding={5} minHeight={"100vh"}>
         <Routes>
           <Route path="/" element={<Home />}></Route>

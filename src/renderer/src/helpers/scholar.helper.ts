@@ -100,7 +100,7 @@ function getYearsFromDocument(document: Document): string[] {
         continue;
       }
 
-      const right = +yearElement.style.right.match(/[0-9]+/)[0];
+      const right = +yearElement["style"].right.match(/[0-9]+/)[0];
       const index = (right / 32) >> 0;
       const year = yearElement.textContent;
       years[index] = year;
@@ -124,7 +124,7 @@ function getCitationsFromDocument(document: Document): number[] {
     );
 
     for (const c of totalCitations) {
-      const index = +c.style.zIndex - 1;
+      const index = +c["style"].zIndex - 1;
       const content = c?.textContent || 0;
       citations[index] = +content;
     }

@@ -1,6 +1,6 @@
 import { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Center, Text, Input, Stack, useToast, Button } from "@chakra-ui/react";
+import { Center, Text, Stack, useToast, Button } from "@chakra-ui/react";
 
 function Home(): JSX.Element {
   const navigate = useNavigate();
