@@ -1,31 +1,28 @@
-import { Box } from '@chakra-ui/react'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route } from "react-router-dom";
+import { Stack } from "@chakra-ui/react";
 
-import { Header } from '@renderer/components/Header'
-import { CustomBreadcrumb } from '@renderer/components/CustomBreadcrumb'
-import { Main } from '@renderer/pages/Main'
-import { Preview } from '@renderer/pages/Preview'
-import { Results } from '@renderer/pages/Results'
-import { Footer } from './components/Footer'
+import Home from "@renderer/routes/Home";
+import ReadSheet from "@renderer/routes/ReadSheet";
+import SearchUsers from "@renderer/routes/SearchUsers";
+import FormatToSheet from "@renderer/routes/FormatToSheet";
+import Results from "@renderer/routes/Results";
+import Header from "@renderer/components/Header";
 
 const App = (): JSX.Element => {
   return (
-    <Box pt={'16'}>
-      <HashRouter>
-        <Header />
-        <Box p={5}>
-          <CustomBreadcrumb />
-          <Routes>
-            <Route path="/" element={<Main />} />
-            <Route path="/preview" element={<Preview />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="*" element={<Navigate to={'/'} />} />
-          </Routes>
-        </Box>
-        <Footer />
-      </HashRouter>
-    </Box>
-  )
-}
+    <HashRouter>
+      {/* <Header /> */}
+      <Stack spacing={2} padding={5} minHeight={"100vh"}>
+        <Routes>
+          <Route path="/" element={<Home />}></Route>
+          <Route path="/read-sheet" element={<ReadSheet />}></Route>
+          <Route path="/search-users" element={<SearchUsers />}></Route>
+          <Route path="/format-to-sheet" element={<FormatToSheet />}></Route>
+          <Route path="/results" element={<Results />}></Route>
+        </Routes>
+      </Stack>
+    </HashRouter>
+  );
+};
 
-export default App
+export default App;
