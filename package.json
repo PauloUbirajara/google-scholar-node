@@ -26,6 +26,7 @@
     "@electron-toolkit/utils": "^1.0.2",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
+    "@tanstack/react-query": "^4.29.5",
     "electron-updater": "^4.6.5",
     "exceljs": "^4.3.0",
     "framer-motion": "^7.6.7",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^1.2.3",
+    "@tanstack/eslint-plugin-query": "^4.29.4",
     "@types/node": "16.11.22",
     "@types/react": "18.0.21",
     "@types/react-dom": "18.0.6",
