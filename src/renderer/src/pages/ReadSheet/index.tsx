@@ -1,4 +1,4 @@
-import { Button, Stack, Textarea } from "@chakra-ui/react";
+import { Button, Divider, Stack, Textarea } from "@chakra-ui/react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
@@ -6,11 +6,12 @@ import { UpdateService } from "@renderer/services/update.service";
 import LocalFetchUserService from "@renderer/services/fetch.service";
 import BaseTemplate from "@renderer/templates/base.template";
 import { useNavigate } from "react-router-dom";
+import { NavBar } from "@renderer/components/NavBar";
 
-function ProcessPage() {
+function ReadSheetPage() {
   const usersRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const fetchUsers = () => {
     query.refetch();
@@ -86,12 +87,14 @@ function ProcessPage() {
   };
 
   const goHome = () => {
-    navigate('/')
-  }
+    navigate("/");
+  };
 
   return (
-    <BaseTemplate title="Processar planilha">
-      <Stack>
+    <BaseTemplate>
+      <Stack spacing={2}>
+        <NavBar title="Ler planilha" />
+        <Divider />
         <Textarea ref={usersRef}></Textarea>
         {/* 
       TODO with useQueries
@@ -122,4 +125,4 @@ function ProcessPage() {
   );
 }
 
-export default ProcessPage;
+export default ReadSheetPage;

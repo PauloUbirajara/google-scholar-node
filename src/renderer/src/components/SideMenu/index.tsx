@@ -11,16 +11,12 @@ import {
   ListItem,
   OrderedList,
   Stack,
+  Text,
   useDisclosure
 } from "@chakra-ui/react";
-import { ButtonHTMLAttributes, MouseEventHandler } from "react";
-import { To, useNavigate } from "react-router-dom";
-
-const steps = [
-  { title: "First", description: "Contact Info" },
-  { title: "Second", description: "Date & Time" },
-  { title: "Third", description: "Select Rooms" }
-];
+import { routes } from "@renderer/routes";
+import { ButtonHTMLAttributes, MouseEventHandler, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SideMenu() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -29,6 +25,8 @@ function SideMenu() {
   const goToPage = (path: string) => {
     navigate(path);
   };
+
+  const selectedFile = useMemo(() => sessionStorage.getItem("file"), []);
 
   return (
     <>
@@ -48,14 +46,15 @@ function SideMenu() {
           <DrawerHeader borderBottomWidth="1px">Etapas</DrawerHeader>
           <DrawerBody>
             <Stack>
-              <Button onClick={() => goToPage("/")}>Início</Button>
-              <Button onClick={() => goToPage("/process")}>
-                Processar planilha
-              </Button>
-              <Button onClick={() => goToPage("/fetch-users")}>
-                Buscar usuários
-              </Button>
-              <Button onClick={() => goToPage("/results")}>Resultados</Button>
+              {selectedFile ? <Text>{selectedFile}</Text> : null}
+              {routes.map((route, index) => (
+                <Button
+                  key={`sidemenu-button-${index}`}
+                  onClick={() => goToPage(route.path)}
+                >
+                  {route.name}
+                </Button>
+              ))}
             </Stack>
           </DrawerBody>
         </DrawerContent>

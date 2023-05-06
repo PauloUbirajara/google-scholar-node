@@ -1,4 +1,4 @@
-import { Button, Stack, Textarea } from "@chakra-ui/react";
+import { Button, Divider, Stack, Textarea } from "@chakra-ui/react";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
@@ -6,11 +6,12 @@ import { UpdateService } from "@renderer/services/update.service";
 import LocalFetchUserService from "@renderer/services/fetch.service";
 import BaseTemplate from "@renderer/templates/base.template";
 import { useNavigate } from "react-router-dom";
+import { NavBar } from "@renderer/components/NavBar";
 
 function FetchUsersPage() {
   const usersRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const fetchUsers = () => {
     query.refetch();
@@ -86,12 +87,16 @@ function FetchUsersPage() {
   };
 
   const goHome = () => {
-    navigate('/')
-  }
+    navigate("/");
+  };
+
+  const selectedFile = sessionStorage.getItem('file')
 
   return (
-    <BaseTemplate title="Buscar usuários">
-      <Stack>
+    <BaseTemplate>
+      <Stack spacing={2}>
+        <NavBar title="Buscar usuários" />
+        <Divider />
         <Textarea ref={usersRef}></Textarea>
         {/* 
       TODO with useQueries

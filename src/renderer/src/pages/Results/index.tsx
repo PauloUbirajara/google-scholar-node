@@ -1,7 +1,8 @@
-import { Button, Heading, Stack, useToast } from "@chakra-ui/react";
+import { Button, Divider, Heading, Stack, useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 import BaseTemplate from "@renderer/templates/base.template";
+import { NavBar } from "@renderer/components/NavBar";
 
 function ResultsPage() {
   const navigate = useNavigate();
@@ -19,8 +20,10 @@ function ResultsPage() {
   };
 
   return (
-    <BaseTemplate title="Resultados">
-      <Stack>
+    <BaseTemplate>
+      <Stack spacing={2}>
+        <NavBar title="Resultados" description={null} />
+        <Divider />
         <Button onClick={saveResults} colorScheme="green">
           Salvar
         </Button>

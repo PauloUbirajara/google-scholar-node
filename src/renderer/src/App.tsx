@@ -7,22 +7,22 @@ import {
 import { Stack } from "@chakra-ui/react";
 
 import ErrorPage from "./pages/Error";
-import FetchUsersPage from "./pages/FetchUsers";
-import HomePage from "./pages/Home";
-import ProcessPage from "./pages/ProcessSheet";
-import ResultsPage from "./pages/Results";
+import { routes } from "./routes";
 
-const routes = createRoutesFromElements(
+const availableRoutes = createRoutesFromElements(
   <>
-    <Route path="/" element={<HomePage />}></Route>
-    <Route path="/process" element={<ProcessPage />} />
-    <Route path="/fetch-users" element={<FetchUsersPage />} />
-    <Route path="/results" element={<ResultsPage />} />
+    {routes.map((route, index) => (
+      <Route
+        key={`route-${index}`}
+        path={route.path}
+        element={route.component}
+      ></Route>
+    ))}
     <Route path="*" element={<ErrorPage />}></Route>
   </>
 );
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(availableRoutes);
 
 const App = (): JSX.Element => {
   return (
