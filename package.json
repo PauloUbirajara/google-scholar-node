@@ -29,6 +29,7 @@
     "@tanstack/react-query": "^4.29.5",
     "electron-updater": "^4.6.5",
     "exceljs": "^4.3.0",
+    "formik": "^2.2.9",
     "framer-motion": "^7.6.7",
     "react-router-dom": "^6.4.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.0/xlsx-0.19.0.tgz"
