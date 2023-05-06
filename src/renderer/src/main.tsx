@@ -1,9 +1,9 @@
-import { createRoot } from "react-dom/client";
 import { ChakraProvider } from "@chakra-ui/react";
+import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import App from "./App";
 import "../styles/main.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
