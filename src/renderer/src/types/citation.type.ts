@@ -1,0 +1,1 @@
+export type Citation = { year: number; value: number };
