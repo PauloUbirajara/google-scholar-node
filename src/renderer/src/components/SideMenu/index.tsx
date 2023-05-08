@@ -1,6 +1,5 @@
 import { HamburgerIcon } from "@chakra-ui/icons";
 import {
-  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -8,15 +7,14 @@ import {
   DrawerHeader,
   DrawerOverlay,
   IconButton,
-  ListItem,
-  OrderedList,
   Stack,
   Text,
   useDisclosure
 } from "@chakra-ui/react";
-import { routes } from "@renderer/routes";
-import { ButtonHTMLAttributes, MouseEventHandler, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { routes } from "@renderer/routes";
+import { FileMeta } from "@renderer/types/filemeta.type";
 
 function SideMenu() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -26,7 +24,12 @@ function SideMenu() {
     navigate(path);
   };
 
-  const selectedFile = useMemo(() => sessionStorage.getItem("file"), []);
+  let fileName: string | null = null;
+  const fileMetadataString = sessionStorage.getItem("fileMetadata");
+  if (fileMetadataString !== null) {
+    const fileMetadata: FileMeta = JSON.parse(fileMetadataString);
+    fileName = fileMetadata.name;
+  }
 
   return (
     <>
@@ -46,7 +49,7 @@ function SideMenu() {
           <DrawerHeader borderBottomWidth="1px">Etapas</DrawerHeader>
           <DrawerBody>
             <Stack>
-              {selectedFile ? <Text>{selectedFile}</Text> : null}
+              {fileName ? <Text>{fileName}</Text> : null}
               {routes.map((route, index) => (
                 <Button
                   key={`sidemenu-button-${index}`}
