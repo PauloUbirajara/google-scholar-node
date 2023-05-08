@@ -1,127 +1,94 @@
-import { Button, Divider, Stack, Textarea } from "@chakra-ui/react";
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
-
-import { UpdateService } from "@renderer/services/update.service";
-import LocalFetchUserService from "@renderer/services/fetch.service";
-import BaseTemplate from "@renderer/templates/base.template";
+import { Divider, Progress, Stack, Text } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { NavBar } from "@renderer/components/NavBar";
+import { useFetchCitations } from "@renderer/hooks/useFetchCitations.hook";
+import { useParseRows } from "@renderer/hooks/useParseRows.hook";
+import { parseHTML } from "@renderer/helpers/user.helper";
+import BaseTemplate from "@renderer/templates/base.template";
 
 function FetchUsersPage() {
-  const usersRef = useRef<HTMLTextAreaElement>(null);
-  const queryClient = useQueryClient();
+  const { links, longestRows, readWorkbook } = useParseRows();
+  const sheet = sessionStorage.getItem("sheet");
+  let fetchTimeout: NodeJS.Timeout;
   const navigate = useNavigate();
 
-  const fetchUsers = () => {
-    query.refetch();
-  };
+  useEffect(() => {
+    if (!sheet) return;
+    const workbook = JSON.parse(sheet);
+    readWorkbook(workbook);
+  }, []);
 
-  // const fetchUsersWithUseQueries = () => {
-  //   try {
-  //     // if (!usersRef.current) {
-  //     //   throw new Error("TextArea ref not updated");
-  //     // }
+  useEffect(() => {
+    if (!links.length) return;
+    if (!longestRows.length) return;
 
-  //     // const usersTextarea = usersRef.current.value;
-  //     // const users = usersTextarea
-  //     //   .split("\n")
-  //     //   .map((val) => val.trim())
-  //     //   .filter((val) => Boolean(val));
+    console.log("links, longestRows", links, longestRows);
+  }, [links, longestRows]);
 
-  //     const users = [
-  //       "https://scholar.google.com.br/citations?user=2AsIb8MAAAAJ&hl=pt-BR&oi=ao",
-  //       "https://scholar.google.com.br/citations?user=TB4cLXEAAAAJ&hl=pt-BR"
-  //     ];
+  const results = useFetchCitations(links);
 
-  //     if (!users.length) {
-  //       throw new Error("No users");
-  //     }
-
-  //     return users.map((u, i) => ({
-  //       queryKey: ["user", `user-${i}`],
-  //       queryFn: () => LocalFetchUserService.fetchUserHTML(u)
-  //     }));
-  //   } catch (e) {
-  //     queryClient.invalidateQueries({
-  //       queryKey: ["users"]
-  //     });
-  //     return [];
-  //   }
-  // };
-
-  const fetchUsersWithUseQuery = () => {
-    if (!usersRef.current) {
-      return Promise.reject("TextArea not changed");
-    }
-
-    const usersTextarea = usersRef.current.value;
-    const users = usersTextarea
-      .split("\n")
-      .map((val) => val.trim())
-      .filter((val) => Boolean(val));
-
-    if (!users.length) {
-      return Promise.reject("No users");
-    }
-
-    return Promise.all(
-      users.map((u) => LocalFetchUserService.fetchUserHTML(u))
+  useEffect(() => {
+    if (!results.length) return;
+    console.log("results", results);
+    console.log(
+      "parse",
+      results.map((result) => parseHTML(result.data))
     );
-  };
+  }, [results]);
 
-  // TODO useQueries
-  // const query = useQueries({
-  //   queries: fetchUsers()
-  // });
+  const canCalculateProgress = links.length && results.length;
+  const hasFetchUsers = canCalculateProgress && links.length === results.length;
 
-  const query = useQuery({
-    queryFn: fetchUsersWithUseQuery,
-    queryKey: ["users"],
-    enabled: false,
-    retry: true
-  });
+  const progress = canCalculateProgress
+    ? Math.floor(
+        results.filter((elem) => elem.status === "success").length /
+          links.length
+      ) * 100
+    : 0;
 
-  const checkForUpdates = () => {
-    UpdateService.getReleases().then(console.log).catch(console.warn);
-  };
+  useEffect(() => {
+    if (progress !== 100) return;
 
-  const goHome = () => {
-    navigate("/");
-  };
+    clearTimeout(fetchTimeout);
+    if (!(results.map((r) => r.status === "success").length === links.length))
+      return;
 
-  const selectedFile = sessionStorage.getItem('file')
+    // const parsedResults = {};
+    // results.forEach((res, i) => {
+    //   const linkString = links[i] as string;
+    //   parsedResults[linkString] = parseHTML(res.data);
+    // });
+    const parsedResults = results.map(res => parseHTML(res.data))
+
+    fetchTimeout = setTimeout(() => {
+      const fetchResults = JSON.stringify({
+        longestRows,
+        links,
+        results: parsedResults
+      });
+      sessionStorage.setItem("fetchResults", fetchResults);
+      navigate("/results");
+    }, 2000);
+  }, [progress]);
 
   return (
     <BaseTemplate>
       <Stack spacing={2}>
         <NavBar title="Buscar usuários" />
         <Divider />
-        <Textarea ref={usersRef}></Textarea>
-        {/* 
-      TODO with useQueries
-      {query.map((d, i) => {
-        return (
-          <Skeleton key={i} isLoaded={d.isFetched}>
-            <Code>
-              {i}) {d.data?.slice(0, 50)}
-            </Code>
-          </Skeleton>
-        );
-      })} */}
-
-        {/* <Skeleton isLoaded={query.isFetched}>
-          {query.data?.map((d, i) => {
-            return (
-              <Code key={i}>
-                {i}) {d.slice(0, 50)}
-              </Code>
-            );
-          })}
-        </Skeleton> */}
-        {/* <Button onClick={fetchUsers}>Fetch Users</Button>
-        <Button onClick={checkForUpdates}>Check for updates</Button>
-        <Button onClick={goHome}>Voltar ao início</Button> */}
+        <Text>
+          {hasFetchUsers
+            ? "Busca de usuários completa, buscando por dados de citações"
+            : `Buscando usuários: ${progress.toFixed(2)}`}
+        </Text>
+        <Progress
+          value={progress}
+          hasStripe={true}
+          rounded={"md"}
+          colorScheme={hasFetchUsers ? "green" : "blue"}
+        ></Progress>
       </Stack>
     </BaseTemplate>
   );

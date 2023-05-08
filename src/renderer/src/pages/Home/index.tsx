@@ -1,72 +1,54 @@
-import {
-  Button,
-  Divider,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  Stack
-} from "@chakra-ui/react";
+import { Button, Divider, Input, Stack, useBoolean } from "@chakra-ui/react";
 import { Form, useNavigate } from "react-router-dom";
-import { FormikValues, useFormik } from "formik";
+import { useRef } from "react";
 
 import BaseTemplate from "@renderer/templates/base.template";
 import { NavBar } from "@renderer/components/NavBar";
+import { saveFileInSessionStorage } from "@renderer/helpers/file.helper";
 
 const supportedExtensions = [".xlsx", ".xls", ".csv"];
 
 function HomePage() {
   const navigate = useNavigate();
-  const formik = useFormik({
-    initialValues: { file: `` },
-    onSubmit: (values: FormikValues) => {
-      try {
-        const { file } = values;
-        formik.setSubmitting(true);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useBoolean(false);
+  let submitTimeout: NodeJS.Timeout;
 
-        if (!Boolean(file)) {
-          throw new Error("Não foi fornecido um arquivo");
-        }
+  function selectFile(e) {
+    e.preventDefault();
+    if (!fileRef.current) return;
+    const selectedFile = fileRef.current.files?.item(0);
+    if (!selectedFile) return;
 
-        const isSupported = supportedExtensions.reduce(
-          (result, extension) => file.endsWith(extension) || result,
-          false
-        );
-        if (!isSupported) {
-          throw new Error("Tipo de arquivo não suportado");
-        }
+    clearTimeout(submitTimeout);
 
-        sessionStorage.setItem("file", file);
-        formik.setSubmitting(false);
-        navigate("/read-sheet");
-      } catch (e: any) {
-        formik.setErrors({ file: e.message });
-      } finally {
-        formik.setSubmitting(false);
-      }
-    }
-  });
+    setLoading.on();
+
+    submitTimeout = setTimeout(() => {
+      setLoading.off();
+      saveFileInSessionStorage(selectedFile);
+      navigate("/read-sheet");
+    }, 1500);
+  }
 
   return (
     <BaseTemplate>
       <Stack spacing={2}>
         <NavBar title="Início" />
         <Divider />
-        <Form onSubmit={formik.handleSubmit}>
+        <Form>
           <Stack spacing={2}>
-            <FormControl isInvalid={formik.touched && !formik.errors?.file}>
-              <Input
-                type="file"
-                multiple={false}
-                name={`file`}
-                value={formik.values.file}
-                onChange={formik.handleChange}
-                accept={supportedExtensions.join(",")}
-                padding={1}
-              ></Input>
-              <FormErrorMessage>{formik.errors.file}</FormErrorMessage>
-            </FormControl>
-            <Button type="submit" isLoading={formik.isSubmitting}>
-              Carregar
+            <Input
+              type="file"
+              multiple={false}
+              id="file"
+              ref={fileRef}
+              name="file"
+              accept={supportedExtensions.join(",")}
+              padding={1}
+            ></Input>
+            <Button onClick={selectFile} isLoading={loading}>
+              Selecionar
             </Button>
           </Stack>
         </Form>
