@@ -10,11 +10,10 @@ import {
 import { GOOGLE_SCHOLAR_REGEX } from "@renderer/constants";
 
 export function useResultSpreadsheet() {
-  const [resultSheet, setResultSheet] = useState(null);
+  const [resultSheet, setResultSheet] = useState<XLSX.WorkBook>();
 
   function loadResults(workbook: XLSX.WorkBook, fetchResults: FetchResults) {
     const sheetNames = workbook.SheetNames;
-    // for (const name of sheetNames) {
     let newResultSheet: string[][][] = [];
     for (let i = 0; i < sheetNames.length; i++) {
       const name = workbook.SheetNames[i];
@@ -23,43 +22,73 @@ export function useResultSpreadsheet() {
         header: 1
       });
 
-      JSONSheet[0] = [
-        ...JSONSheet[0],
-        ...getEmptyArray(JSONSheet[0].length, fetchResults.longestRows[i]),
-        ...getHeader()
-      ];
-
       JSONSheet = [
-        ...JSONSheet[0],
-        ...JSONSheet.slice(1).map((row) => {
-          const linkIndex = row.findIndex((cell) =>
-            cell.match(GOOGLE_SCHOLAR_REGEX)
-          );
-          if (linkIndex === -1) return;
-          const link = row[linkIndex];
-          const foundLinkIndex = fetchResults.links.indexOf(link);
-          if (foundLinkIndex === -1) return;
-          const rowDetails = getResultRow(fetchResults.results[foundLinkIndex]);
-          return rowDetails;
-        })
+        [...getEmptyArray(fetchResults.longestRows[i] + 1), ...getHeader()],
+        ...JSONSheet
       ];
-      // const resultSheet = []
-      // resultSheet.push()
-      // JSONSheet[0] = JSONSheet[0].concat(getHeader())
 
-      // for (let j = 0; j < JSONSheet.length; j++) {
-      //   const rowArray: string[] = JSONSheet[i] as string[];
-      //   const emptyArray = Array(
-      //     fetchResults.longestRows[i] - rowArray.length
-      //   ).fill("");
+      // JSONSheet[1] = JSONSheet[1].map((elem) =>
+      //   elem === undefined || elem === null ? "" : elem
+      // );
 
-      //   if (!(cell in fetchResults)) continue;
-      //   JSONSheet[j] = rowArray.concat(emptyArray.concat(fetchResults.results));
+      for (let j = 1; j < JSONSheet.length; j++) {
+        const rowSize = JSONSheet[j].length;
+        JSONSheet[j] = [
+          ...JSONSheet[j],
+          ...getEmptyArray(rowSize, fetchResults.longestRows[i] + 1)
+        ];
+
+        const linkIndex = JSONSheet[j].findIndex((cell) =>
+          GOOGLE_SCHOLAR_REGEX.test(cell)
+        );
+        if (linkIndex === -1) continue;
+        const link = JSONSheet[j][linkIndex];
+        const foundLinkIndex = fetchResults.links.indexOf(link);
+        if (foundLinkIndex === -1) continue;
+        const rowDetails = getResultRow(fetchResults.results[foundLinkIndex]);
+        JSONSheet[j] = [...JSONSheet[j], ...rowDetails];
+      }
+
+      // for (let i = 1; i < JSONSheet.length; i++) {
+      //   JSONSheet[i] = [
+      //     ...JSONSheet[i]
+      //   ]
       // }
-      // console.log(JSONSheet);
+
+      console.log("oia", JSONSheet);
+
+      // for (let i = 1; i < JSONSheet.length; i++) {
+      //   JSONSheet[i] = [
+      //     ...JSONSheet[i].map((row) => {
+      //       const linkIndex = row.findIndex((cell) =>
+      //         GOOGLE_SCHOLAR_REGEX.test(cell)
+      //       );
+      //       if (linkIndex === -1) return "";
+      //       const link = row[linkIndex];
+      //       const foundLinkIndex = fetchResults.links.indexOf(link);
+      //       if (foundLinkIndex === -1) return "";
+      //       const rowDetails = getResultRow(
+      //         fetchResults.results[foundLinkIndex]
+      //       );
+      //       return rowDetails;
+      //     })
+      //   ];
+      // }
+
+      JSONSheet = JSONSheet.map((elem) =>
+        elem === undefined || elem === null ? "" : elem
+      );
+
       newResultSheet.push(JSONSheet);
     }
-    setResultSheet(newResultSheet);
+    console.log(newResultSheet);
+
+    for (let i = 0; i < workbook.SheetNames.length; i++) {
+      const sheetName = workbook.SheetNames[i];
+      workbook.Sheets[sheetName] = XLSX.utils.json_to_sheet(newResultSheet[i]);
+    }
+
+    setResultSheet(workbook);
   }
 
   return { resultSheet, loadResults };

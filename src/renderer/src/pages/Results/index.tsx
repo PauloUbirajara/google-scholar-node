@@ -1,12 +1,13 @@
 import { Button, Stack, useBoolean, useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { WorkBook } from "xlsx";
+import XLSX from "xlsx";
 
 import { NavBar } from "@renderer/components/NavBar";
 import BaseTemplate from "@renderer/templates/base.template";
 import { useResultSpreadsheet } from "@renderer/hooks/useResultSpreadsheet.hook";
 import { FetchResults } from "@renderer/types/fetchResults.type";
+import { getOutputFilename } from "@renderer/helpers/file.helper";
 
 function ResultsPage() {
   const showToast = useToast({ isClosable: true, title: "Resultados" });
@@ -21,9 +22,8 @@ function ResultsPage() {
     if (!fetchResultsString) return;
     if (!sheetString) return;
 
-    // const fetchResults: { [link: string]: FetchResults } =
     const fetchResults: FetchResults = JSON.parse(fetchResultsString);
-    const workbook: WorkBook = JSON.parse(sheetString);
+    const workbook: XLSX.WorkBook = JSON.parse(sheetString);
 
     console.log("fetchresults", fetchResults);
     console.log("workbook", workbook);
@@ -43,10 +43,21 @@ function ResultsPage() {
 
   const saveResults = () => {
     if (!canSave) return;
-    showToast({
-      description: "Salvo com sucesso",
-      status: "success"
-    });
+    setCanSave.off();
+    try {
+      XLSX.writeFile(resultSheet as XLSX.WorkBook, getOutputFilename(), {});
+      setCanSave.on();
+      showToast({
+        description: "Salvo com sucesso",
+        status: "success"
+      });
+    } catch (e) {
+      console.warn("Não foi possível salvar resultado", e);
+      showToast({
+        description: "Não foi possível salvar resultado",
+        status: "warning"
+      });
+    }
   };
 
   return (

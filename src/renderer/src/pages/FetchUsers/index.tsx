@@ -55,12 +55,7 @@ function FetchUsersPage() {
     if (!(results.map((r) => r.status === "success").length === links.length))
       return;
 
-    // const parsedResults = {};
-    // results.forEach((res, i) => {
-    //   const linkString = links[i] as string;
-    //   parsedResults[linkString] = parseHTML(res.data);
-    // });
-    const parsedResults = results.map(res => parseHTML(res.data))
+    const parsedResults = results.map((res) => parseHTML(res.data));
 
     fetchTimeout = setTimeout(() => {
       const fetchResults = JSON.stringify({

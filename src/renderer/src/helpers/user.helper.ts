@@ -46,20 +46,22 @@ export function getHeader(): string[] {
   const currentYear = new Date().getFullYear();
   const citationsHeaders = Array.from(Array(YEAR_COUNT))
     .map((_, i) => currentYear - i)
+    .sort((a, b) => a - b)
     .map((c) => `Citações - ${c}`);
   console.log(citationsHeaders);
 
-  return [hIndexHeader, i10IndexHeader, ...citationsHeaders].map(toString);
+  return [hIndexHeader, i10IndexHeader, ...citationsHeaders];
 }
 
-export function getResultRow(results: UserCitations): string[] {
+export function getResultRow(results: UserCitations): (string | number)[] {
   const hIndexValue = results.hIndex;
   const i10IndexValue = results.i10Index;
   const currentYear = new Date().getFullYear();
   const citations = results.citations
     .filter((y) => y.year <= currentYear && y.year >= currentYear - YEAR_COUNT)
     .map((c) => c.value);
-  return [hIndexValue, i10IndexValue, ...citations].map(toString);
+
+  return [hIndexValue, i10IndexValue, ...citations];
 }
 
 function getCitations(html: string): Citation[] {
@@ -112,9 +114,8 @@ export function parseHTML(html: string | undefined): UserCitations {
   return userCitations;
 }
 
-export function getEmptyArray(
-  currentLength: number,
-  expectedLength: number
-): string[] {
-  return Array(expectedLength - currentLength).fill("");
+export function getEmptyArray(a: number, b: number = 0): string[] {
+  const sizeDifference = Math.abs(a - b)
+  if (!sizeDifference) return []
+  return Array(sizeDifference).fill("");
 }

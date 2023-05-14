@@ -32,3 +32,21 @@ export async function getBlobFromDataURL(
   }
   return null;
 }
+
+export function getOutputFilename(): string {
+  const currentDate = new Date();
+  const filenameParams = [
+    currentDate.getDay(),
+    currentDate.getMonth() + 1,
+    currentDate.getFullYear(),
+    currentDate.getHours(),
+    currentDate.getMinutes(),
+    currentDate.getSeconds()
+  ]
+    .map((v: number) => v.toString())
+    .map((v: string) => v.padStart(2, "0"))
+    .join("_");
+
+  const outputFilename = `citations_${filenameParams}.xlsx`;
+  return outputFilename;
+}
